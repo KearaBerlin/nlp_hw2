@@ -1,0 +1,4 @@
+data/wilde_utf8.txt
+data/austen_utf8.txt
+data/dickens_utf8.txt
+data/tolstoy_utf8.txt

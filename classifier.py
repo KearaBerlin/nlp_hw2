@@ -1,20 +1,34 @@
 import argparse
 import sys
+from nltk.tokenize import word_tokenize
 
 parser = argparse.ArgumentParser()
 parser.add_argument('filepath')
-parser.add_argument('-test', '--test')
+parser.add_argument('-test', '--testfile')
 
 args = parser.parse_args()
 
-print(args.filepath)
-print(args.test)
+def read_file(filepath):
+    with open(filepath, 'r', encoding="utf-8") as f:
+        filepaths = [line.strip() for line in f.readlines()]
+    return filepaths
 
-filepaths = []
-with open(args.filepath, 'r') as f:
-    filepaths = [line.strip() for line in f.readlines()]
+filepaths = read_file(args.filepath)
 
-print(filepaths)
+# read in files
+files = []
+for filepath in filepaths:
+    lines = read_file(filepath)
+    print(lines[0])
+# each line is a sample
+# throw out samples that are <= 2 words
+
+if args.testfile:
+    train = [] # TODO read in all data from filepaths
+    test = [] # read from args.testfile
+else:
+    train = [] # TODO get 90% of data from each filepaths
+    test = [] # remaining 10% from each of filepaths
 
 # if __name__ == "__main__":
 #     files_filepath = sys.argv[1]
