@@ -26,27 +26,24 @@ def extract_sentences(filepath):
 
 filepaths = read_file(args.filepath)
 
-# read in files, which will be a list of lists; each nested list is a list of sentences;
+# read in files, which will be a dictionary of lists of sentences;
 # each list of sentences is a list of tokens.
-files = [[] for i in range(len(filepaths))]
-for (i, filepath) in enumerate(filepaths):
+author_datasets = {}
+for filepath in filepaths:
     sentences = extract_sentences(filepath)
-    files[i] = sentences
+    author_datasets[filepath] = sentences
 
 # train / test split
 if args.testfile:
-    train = []
-    for (label, sentences) in enumerate(files):
-        data = [(s, label) for s in sentences]
-        train.extend(data)
+    train = author_datasets
     test = extract_sentences(args.testfile)
 else:
-    train = [] # get 90% of data from each filepaths
-    test = [] # remaining 10% from each of filepaths
-    for (label, sentences) in enumerate(files):
-        data = [(s, label) for s in sentences]
-        train_test = train_test_split(data, test_size=0.1)
-        train.extend(train_test[0])
-        test.extend(train_test[1])
+    train = {} # get 90% of data from each file
+    test = {} # remaining 10% from each file
+    for filepath in filepaths:
+        train_test = train_test_split(author_datasets[filepath], test_size=0.1)
+        train[filepath] = train_test[0]
+        test[filepath] = train_test[1]
 
-print(f"Train: {len(train)} Test: {len(test)}")
+for filepath in filepaths:
+    print(f"{filepath} Train: {len(train[filepath])} Test: {len(test[filepath])}")
