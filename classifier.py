@@ -1,6 +1,8 @@
 import argparse
 import sys
-from nltk.tokenize import word_tokenize
+import nltk
+
+nltk.download('punkt')
 
 parser = argparse.ArgumentParser()
 parser.add_argument('filepath')
@@ -19,7 +21,8 @@ filepaths = read_file(args.filepath)
 files = []
 for filepath in filepaths:
     lines = read_file(filepath)
-    print(lines[0])
+    sentences = [nltk.tokenize.word_tokenize(line) for line in lines]
+    print(sentences[0])
 # each line is a sample
 # throw out samples that are <= 2 words
 
