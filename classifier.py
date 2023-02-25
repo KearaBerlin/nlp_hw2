@@ -4,6 +4,8 @@ import random
 import numpy as np
 import nltk
 from sklearn.model_selection import train_test_split
+from nltk.util import bigrams
+from nltk.lm.preprocessing import padded_everygram_pipeline
 # Hi
 nltk.download('punkt')
 
@@ -47,3 +49,15 @@ else:
 
 for filepath in filepaths:
     print(f"{filepath} Train: {len(train[filepath])} Test: {len(test[filepath])}")
+
+train_bigram = {}
+test_bigram = {}
+
+for filepath in filepaths:
+    for i in range(len(train[filepath])):
+        # To Do implement following command? train, vocab = padded_everygram_pipeline(2, text)
+        train_bigram[filepath] = list(bigrams(train[filepath][i]))
+        test_bigram[filepath] = list(bigrams(test[filepath][i]))
+    print(len(train_bigram[filepath]))
+    print(len(test_bigram[filepath]))
+    print(train_bigram[filepath][0])
