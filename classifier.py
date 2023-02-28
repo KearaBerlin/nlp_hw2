@@ -7,8 +7,8 @@ import numpy as np
 import nltk
 from sklearn.model_selection import train_test_split
 from nltk.util import bigrams
-from nltk.lm.preprocessing import padded_everygram_pipeline
-from nltk.lm import MLE
+from nltk.lm.preprocessing import padded_everygram_pipeline, pad_both_ends
+from nltk.lm import MLE, StupidBackoff
 # Hi
 nltk.download('punkt')
 
@@ -67,7 +67,8 @@ for filepath in filepaths:
 
     train_bigram, train_vocab = padded_everygram_pipeline(2, train[filepath])
 
-    lm = MLE(2)
+    # lm = MLE(2)
+    lm = StupidBackoff(order=2)
     lm.fit(train_bigram, train_vocab)
     lms[filepath] = lm
     print(lm.vocab)
@@ -76,27 +77,33 @@ for filepath in filepaths:
     # print(train_bigram[filepath][0])
 
 for label in filepaths:
-    test_bigram, test_vocab = padded_everygram_pipeline(2, test[label])
+    # test_bigram, test_vocab = padded_everygram_pipeline(2, test[label])
 
     num_correct = 0
-    for sentence in test_bigram:
+    # for sentence in test_bigram:
+    for sentence in test[label]:
         # new_sentence = copy.deepcopy(sentence)
         # try:
         #     next(new_sentence)
         # except StopIteration:
         #     print("uh oh")
         #     continue
-        sentence = [ngram for ngram in sentence]
+        # sentence = [ngram for ngram in sentence]
+        bigram_sentence = list(bigrams(pad_both_ends(sentence, n=2)))
 
         best_perplexity = math.inf
         best_filepath = ""
         for (filepath, model) in lms.items():
-            perplexity = model.perplexity(sentence)
+            # perplexity = model.perplexity(sentence)
+            perplexity = model.perplexity(bigram_sentence)
+
             if best_perplexity > perplexity:
                 best_perplexity = perplexity
                 best_filepath = filepath
+
         if label == best_filepath:
             num_correct = num_correct+1
+
     accuracy = num_correct/len(test[label])
     print(accuracy)
 
