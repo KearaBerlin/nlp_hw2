@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 from nltk.util import bigrams
 from nltk.lm.preprocessing import padded_everygram_pipeline, pad_both_ends
 from nltk.lm import MLE, StupidBackoff
-# Hi
+
 nltk.download('punkt')
 
 parser = argparse.ArgumentParser()
@@ -60,11 +60,6 @@ lms = {}
 
 for filepath in filepaths:
 
-    # for i in range(len(train[filepath])):
-    #     # To Do implement following command? train, vocab = padded_everygram_pipeline(2, text)
-    #     train_bigram[filepath] = list(bigrams(train[filepath][i]))
-    #     test_bigram[filepath] = list(bigrams(test[filepath][i]))
-
     train_bigram, train_vocab = padded_everygram_pipeline(2, train[filepath])
 
     # lm = MLE(2)
@@ -72,30 +67,22 @@ for filepath in filepaths:
     lm.fit(train_bigram, train_vocab)
     lms[filepath] = lm
     print(lm.vocab)
-    # print(len(train_bigram[filepath]))
-    # print(len(test_bigram[filepath]))
-    # print(train_bigram[filepath][0])
 
 for label in filepaths:
-    # test_bigram, test_vocab = padded_everygram_pipeline(2, test[label])
+    test_bigram, test_vocab = padded_everygram_pipeline(2, test[label])
 
     num_correct = 0
-    # for sentence in test_bigram:
-    for sentence in test[label]:
-        # new_sentence = copy.deepcopy(sentence)
-        # try:
-        #     next(new_sentence)
-        # except StopIteration:
-        #     print("uh oh")
-        #     continue
-        # sentence = [ngram for ngram in sentence]
-        bigram_sentence = list(bigrams(pad_both_ends(sentence, n=2)))
+    for sentence in test_bigram:
+    # for sentence in test[label]:
+
+        sentence = [ngram for ngram in sentence]
+        # bigram_sentence = list(bigrams(pad_both_ends(sentence, n=2)))
 
         best_perplexity = math.inf
         best_filepath = ""
         for (filepath, model) in lms.items():
-            # perplexity = model.perplexity(sentence)
-            perplexity = model.perplexity(bigram_sentence)
+            perplexity = model.perplexity(sentence)
+            # perplexity = model.perplexity(bigram_sentence)
 
             if best_perplexity > perplexity:
                 best_perplexity = perplexity
