@@ -8,7 +8,9 @@ import nltk
 from sklearn.model_selection import train_test_split
 from nltk.util import bigrams
 from nltk.lm.preprocessing import padded_everygram_pipeline, pad_both_ends
-from nltk.lm import MLE, StupidBackoff
+from nltk.lm import MLE, StupidBackoff, KneserNeyInterpolated, Lidstone,\
+    AbsoluteDiscountingInterpolated, Laplace, WittenBellInterpolated
+from nltk.lm.smoothing import KneserNey, AbsoluteDiscounting, WittenBell
 
 nltk.download('punkt')
 
@@ -56,6 +58,17 @@ for filepath in filepaths:
 train_bigram = {}
 test_bigram = {}
 
+# all_models = {
+#     "MLE": {},
+#     "StupidBackoff": {},
+#     "KneserNey": {},
+#     "KneserNeyInterpolated": {},
+#     "AbsoluteDiscounting": {},
+#     "AbsoluteDiscountingInterpolated": {},
+#     "Laplace": {},
+#     "WittenBell": {},
+#     "WittenBellInterpolated": {},
+# }
 lms = {}
 
 for filepath in filepaths:
@@ -64,9 +77,14 @@ for filepath in filepaths:
 
     # lm = MLE(2)
     lm = StupidBackoff(order=2)
+    # lm = AbsoluteDiscountingInterpolated(order=2)
+    # lm = Laplace()
+    # lm = Lidstone(gamma=0) # TODO what is gamma?
+    # lm = WittenBellInterpolated(order=2)
+
     lm.fit(train_bigram, train_vocab)
     lms[filepath] = lm
-    print(lm.vocab)
+    print(f"vocab length for {filepath}: {len(lm.vocab)}")
 
 for label in filepaths:
     test_bigram, test_vocab = padded_everygram_pipeline(2, test[label])
@@ -92,5 +110,5 @@ for label in filepaths:
             num_correct = num_correct+1
 
     accuracy = num_correct/len(test[label])
-    print(accuracy)
+    print(f"Accuracy for {filepath}: {accuracy}")
 
