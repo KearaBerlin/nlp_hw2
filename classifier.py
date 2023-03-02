@@ -58,17 +58,6 @@ for filepath in filepaths:
 train_bigram = {}
 test_bigram = {}
 
-# all_models = {
-#     "MLE": {},
-#     "StupidBackoff": {},
-#     "KneserNey": {},
-#     "KneserNeyInterpolated": {},
-#     "AbsoluteDiscounting": {},
-#     "AbsoluteDiscountingInterpolated": {},
-#     "Laplace": {},
-#     "WittenBell": {},
-#     "WittenBellInterpolated": {},
-# }
 lms = {}
 
 for filepath in filepaths:
@@ -76,13 +65,18 @@ for filepath in filepaths:
     train_bigram, train_vocab = padded_everygram_pipeline(2, train[filepath])
 
     # lm = MLE(2)
-    lm = StupidBackoff(order=2)
+    # lm = MLE(2, smoothing=KneserNey()) # error: KneserNey needs positional arguments (vocab etc)
+    # lm = StupidBackoff(order=2)
     # lm = AbsoluteDiscountingInterpolated(order=2)
+    # lm = KneserNeyInterpolated(order=2)
     # lm = Laplace()
-    # lm = Lidstone(gamma=0) # TODO what is gamma?
+    lm = Lidstone(order=2, gamma=0.1) # gamma is the amount added to each count
     # lm = WittenBellInterpolated(order=2)
 
     lm.fit(train_bigram, train_vocab)
+    
+    # lm = MLE(2, smoothing=KneserNey(lm.vocab, lm.counts, 2)) # error: unexpected argument smoothing
+
     lms[filepath] = lm
     print(f"vocab length for {filepath}: {len(lm.vocab)}")
 
@@ -110,5 +104,26 @@ for label in filepaths:
             num_correct = num_correct+1
 
     accuracy = num_correct/len(test[label])
-    print(f"Accuracy for {filepath}: {accuracy}")
+    print(f"Accuracy for {label}: {accuracy}")
 
+for (filepath, lm) in lms.items():
+    print()
+    print(f"Generated sequences for {filepath}:")
+    for i in range(5):
+        length = random.randint(4,20)
+        sequence = lm.generate(length)
+
+        sentence = ""
+        for word in sequence:
+            sentence += word + " "
+
+        unigrams_list =  [("<s>",)] + [(token,) for token in sequence] + [("</s>",)]
+        bigrams_list = list(bigrams(pad_both_ends(sequence, n=2)))
+        ngrams = []
+        for (u, b) in zip(unigrams_list, bigrams_list):
+            ngrams.append(u)
+            ngrams.append(b)
+
+        perplexity = lm.perplexity(ngrams)
+
+        print(f"{sentence} (Perplexity: {perplexity})")
